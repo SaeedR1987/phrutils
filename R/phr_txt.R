@@ -39,5 +39,9 @@ phr_txt <- function(
     return(default %||% key)
   }
 
+  value <- as.character(
+    glue::glue(value, .envir = parent.frame())
+  )
+
   value
 }
