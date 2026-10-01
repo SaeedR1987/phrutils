@@ -36,7 +36,7 @@ phr_txt <- function(
   }
 
   if (is.null(value) || value == "") {
-    return(default %||% key)
+    value <- default %||% key
   }
 
   value <- as.character(
