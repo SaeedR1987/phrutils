@@ -2,10 +2,14 @@
 % Please edit documentation in R/get_phr_translations.R
 \name{get_phr_translations}
 \alias{get_phr_translations}
-\title{Get current translation json loaded in the phr_environment}
+\title{Get the translations stored in the phrutils environment}
 \usage{
 get_phr_translations()
 }
+\value{
+Named list: `list(<lang> = list(<key> = text))`.
+}
 \description{
-Get current translation json loaded in the phr_environment
+Lazily loads translations from the default location if none have been
+loaded yet.
 }

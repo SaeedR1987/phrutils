@@ -1,30 +1,28 @@
-# ---- Safe Translation Lookup ----
-#' Get translated text for a given key
+#' Translate text using a translations list
 #'
-#' @param key The translation key (string). The key can be a full text string
-#'   which will be converted to a key format, or a pre-defined key from the
-#'   translation files.
-#' @param lang Optional language code (e.g., "en", "fr"). If NULL, attempts to
-#'   get from session or falls back to phr_current_lang.
-#' @param default Optional default value if key is not found.
-#' @param session Shiny session object for reactive language selection.
-#' @return The translated text string.
+#' Looks up `key` in `translations`, falling back to English, then `default`,
+#' then the marked key. Glue expressions are evaluated in `.envir`.
+#'
+#' @param key Character text (English) used to look up the translation.
+#'   Converted to a lookup key with `phr_text_to_key()`.
+#' @param lang Optional language code. Defaults to "en".
+#' @param default Optional fallback text.
+#' @param translations Named list `list(<lang> = list(<key> = text))`.
+#'   Defaults to the store in the phrutils environment.
+#' @param .envir Environment in which glue expressions are evaluated.
+#'   Defaults to the caller's environment.
+#' @return Character string.
 #' @export
 phr_txt <- function(
     key,
     lang = NULL,
     default = NULL,
-    session = shiny::getDefaultReactiveDomain()
+    translations = get_phr_translations(),
+    .envir = parent.frame()
 ) {
 
-  translations <- get_phr_translations()
-
-  if (is.null(lang)) {
-    lang <- get_phr_language(session)
-  }
-
   if (is.null(lang) || !lang %in% names(translations)) {
-    lang <- .phr_env$current_lang
+    lang <- "en"
   }
 
   lookup_key <- phr_text_to_key(key)
@@ -36,12 +34,8 @@ phr_txt <- function(
   }
 
   if (is.null(value) || value == "") {
-    value <- default %||% paste0("\u29eb", key, "\u29eb")
+    value <- if (is.null(default)) paste0("\u29EB", key, "\u29EB") else default
   }
 
-  value <- as.character(
-    glue::glue(value, .envir = parent.frame())
-  )
-
-  value
+  as.character(glue::glue(value, .envir = .envir))
 }

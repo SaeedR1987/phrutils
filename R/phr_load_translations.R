@@ -1,62 +1,74 @@
-#' Load translation dictionaries from JSON files in inst/app/www/i18n/
+#' Load translation dictionaries from JSON files into the phrutils store
+#'
+#' Reads per-language files (`en.json` with flat `key: text` pairs) or a
+#' combined file (`{"en": {...}, "fr": {...}}`) and stores the result in the
+#' package-private environment used by `phr_txt()`.
+#'
+#' @param package Optional package name; `folder` is then resolved with
+#'   `system.file()` (installed layout, so without `inst/`).
+#' @param folder Folder containing the JSON file(s).
+#' @param file Optional file name inside `folder`. If NULL, all `*.json`
+#'   files in `folder` are read.
+#' @param path Optional explicit file or directory path. Overrides
+#'   `package`, `folder` and `file`.
+#' @param merge If TRUE (default), merge into translations already loaded
+#'   (later loads override earlier keys). If FALSE, replace them.
+#' @return Invisibly, the full stored translations list.
 #' @export
-phr_load_translations <- function() {
+phr_load_translations <- function(
+    package = NULL,
+    folder = file.path("app", "www", "i18n"),
+    file = NULL,
+    path = NULL,
+    merge = TRUE
+) {
 
-  translations <- list()
+  if (!is.null(path)) {
+    target <- path
+  } else if (!is.null(package)) {
+    target <- system.file(folder, package = package)
+    if (!is.null(file) && nzchar(target)) target <- file.path(target, file)
+  } else {
+    candidates <- c(
+      file.path(getwd(), "inst", folder),
+      file.path(getwd(), folder)
+    )
+    target <- candidates[dir.exists(candidates)][1]
+    if (!is.null(file) && !is.na(target)) target <- file.path(target, file)
+  }
 
-  i18n_paths <- c(
-    file.path(getwd(), "inst", "app", "www", "i18n"),
-    file.path(getwd(), "app", "www", "i18n")
-  )
+  loaded <- list()
 
-  i18n_dir <- NULL
+  if (length(target) == 0 || is.na(target) || !nzchar(target) ||
+      !file.exists(target)) {
+    warning("Translation file or folder not found; no translations loaded.")
+  } else {
+    json_files <- if (dir.exists(target)) {
+      list.files(target, pattern = "\\.json$", full.names = TRUE)
+    } else {
+      target
+    }
 
-  for (path in i18n_paths) {
-    if (dir.exists(path)) {
-      i18n_dir <- path
-      break
+    for (json_file in json_files) {
+      tryCatch({
+        content <- jsonlite::fromJSON(json_file, simplifyVector = FALSE)
+        # Combined file: every top-level entry is a language list.
+        # Per-language file: flat key/text pairs named by the file name.
+        is_combined <- length(content) > 0 && all(vapply(content, is.list, TRUE))
+        parsed <- if (is_combined) {
+          content
+        } else {
+          stats::setNames(list(content), tools::file_path_sans_ext(basename(json_file)))
+        }
+        loaded <- utils::modifyList(loaded, parsed)
+      }, error = function(e) {
+        warning("Failed to load translation file: ", json_file, " - ", e$message)
+      })
     }
   }
 
-  if (is.null(i18n_dir)) {
-    warning("i18n directory not found. Using fallback translations.")
-    return(list(
-      en = list(
-        export_tor = "Export ToR",
-        validation_passed = "Validation checks passed (dummy mode).",
-        tor_export_success = "ToR export simulated successfully"
-      ),
-      fr = list(
-        export_tor = "Exporter les TdR",
-        validation_passed = "Verifications terminees avec succes (mode fictif).",
-        tor_export_success = "Exportation simulee des TdR reussie"
-      )
-    ))
-  }
+  current <- if (merge) .phr_env$translations %||% list() else list()
+  .phr_env$translations <- utils::modifyList(current, loaded)
 
-  json_files <- list.files(
-    i18n_dir,
-    pattern = "\\.json$",
-    full.names = TRUE
-  )
-
-  for (json_file in json_files) {
-    lang_code <- tools::file_path_sans_ext(basename(json_file))
-
-    tryCatch({
-      translations[[lang_code]] <-
-        jsonlite::fromJSON(json_file, simplifyVector = FALSE)
-    }, error = function(e) {
-      warning(
-        paste(
-          "Failed to load translation file:",
-          json_file,
-          "-",
-          e$message
-        )
-      )
-    })
-  }
-
-  translations
+  invisible(.phr_env$translations)
 }
