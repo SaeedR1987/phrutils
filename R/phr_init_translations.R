@@ -1,8 +1,10 @@
-#' Initialize saved json translation files
+#' Initialize (replace) the stored translations
 #'
-#' Useful for development when translation files are updated.
+#' Clears what is stored and loads from the given source. Takes the same
+#' arguments as `phr_load_translations()`.
+#'
+#' @inheritParams phr_load_translations
 #' @export
-phr_init_translations <- function() {
-  .phr_env$translations <- phr_load_translations()
-  invisible(.phr_env$translations)
+phr_init_translations <- function(...) {
+  phr_load_translations(..., merge = FALSE)
 }
