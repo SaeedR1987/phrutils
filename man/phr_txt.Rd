@@ -2,30 +2,34 @@
 % Please edit documentation in R/phr_txt.R
 \name{phr_txt}
 \alias{phr_txt}
-\title{Get translated text for a given key}
+\title{Translate text using a translations list}
 \usage{
 phr_txt(
   key,
   lang = NULL,
   default = NULL,
-  session = shiny::getDefaultReactiveDomain()
+  translations = get_phr_translations(),
+  .envir = parent.frame()
 )
 }
 \arguments{
-\item{key}{The translation key (string). The key can be a full text string
-which will be converted to a key format, or a pre-defined key from the
-translation files.}
+\item{key}{Character text (English) used to look up the translation.
+Converted to a lookup key with `phr_text_to_key()`.}
 
-\item{lang}{Optional language code (e.g., "en", "fr"). If NULL, attempts to
-get from session or falls back to phr_current_lang.}
+\item{lang}{Optional language code. Defaults to "en".}
 
-\item{default}{Optional default value if key is not found.}
+\item{default}{Optional fallback text.}
 
-\item{session}{Shiny session object for reactive language selection.}
+\item{translations}{Named list `list(<lang> = list(<key> = text))`.
+Defaults to the store in the phrutils environment.}
+
+\item{.envir}{Environment in which glue expressions are evaluated.
+Defaults to the caller's environment.}
 }
 \value{
-The translated text string.
+Character string.
 }
 \description{
-Get translated text for a given key
+Looks up `key` in `translations`, falling back to English, then `default`,
+then the marked key. Glue expressions are evaluated in `.envir`.
 }

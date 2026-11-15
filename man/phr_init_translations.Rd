@@ -2,10 +2,11 @@
 % Please edit documentation in R/phr_init_translations.R
 \name{phr_init_translations}
 \alias{phr_init_translations}
-\title{Initialize saved json translation files}
+\title{Initialize (replace) the stored translations}
 \usage{
-phr_init_translations()
+phr_init_translations(...)
 }
 \description{
-Useful for development when translation files are updated.
+Clears what is stored and loads from the given source. Takes the same
+arguments as `phr_load_translations()`.
 }

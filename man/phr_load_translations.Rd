@@ -2,10 +2,36 @@
 % Please edit documentation in R/phr_load_translations.R
 \name{phr_load_translations}
 \alias{phr_load_translations}
-\title{Load translation dictionaries from JSON files in inst/app/www/i18n/}
+\title{Load translation dictionaries from JSON files into the phrutils store}
 \usage{
-phr_load_translations()
+phr_load_translations(
+  package = NULL,
+  folder = file.path("app", "www", "i18n"),
+  file = NULL,
+  path = NULL,
+  merge = TRUE
+)
+}
+\arguments{
+\item{package}{Optional package name; `folder` is then resolved with
+`system.file()` (installed layout, so without `inst/`).}
+
+\item{folder}{Folder containing the JSON file(s).}
+
+\item{file}{Optional file name inside `folder`. If NULL, all `*.json`
+files in `folder` are read.}
+
+\item{path}{Optional explicit file or directory path. Overrides
+`package`, `folder` and `file`.}
+
+\item{merge}{If TRUE (default), merge into translations already loaded
+(later loads override earlier keys). If FALSE, replace them.}
+}
+\value{
+Invisibly, the full stored translations list.
 }
 \description{
-Load translation dictionaries from JSON files in inst/app/www/i18n/
+Reads per-language files (`en.json` with flat `key: text` pairs) or a
+combined file (`{"en": {...}, "fr": {...}}`) and stores the result in the
+package-private environment used by `phr_txt()`.
 }
