@@ -9,6 +9,9 @@
 #' @return Invisibly returns `NULL`.
 #' @export
 phr_message <- function(message, origin = NULL) {
+
+  message <- paste(as.character(message), collapse = " ")
+
   full_msg <- paste0(
     "[PHR::Message] ",
     if (!is.null(origin)) paste0("In `", origin, "`: ") else "",

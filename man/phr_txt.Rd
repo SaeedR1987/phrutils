@@ -16,7 +16,8 @@ phr_txt(
 \item{key}{Character text (English) used to look up the translation.
 Converted to a lookup key with `phr_text_to_key()`.}
 
-\item{lang}{Optional language code. Defaults to "en".}
+\item{lang}{Optional language code. Defaults to the language stored in the
+phrutils environment (`.phr_env$current_lang`), then "en".}
 
 \item{default}{Optional fallback text.}
 

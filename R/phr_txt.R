@@ -5,7 +5,8 @@
 #'
 #' @param key Character text (English) used to look up the translation.
 #'   Converted to a lookup key with `phr_text_to_key()`.
-#' @param lang Optional language code. Defaults to "en".
+#' @param lang Optional language code. Defaults to the language stored in the
+#'   phrutils environment (`.phr_env$current_lang`), then "en".
 #' @param default Optional fallback text.
 #' @param translations Named list `list(<lang> = list(<key> = text))`.
 #'   Defaults to the store in the phrutils environment.
@@ -21,7 +22,9 @@ phr_txt <- function(
     .envir = parent.frame()
 ) {
 
-  if (is.null(lang) || !lang %in% names(translations)) {
+  lang <- lang %||% .phr_env$current_lang %||% "en"
+
+  if (!lang %in% names(translations)) {
     lang <- "en"
   }
 
